@@ -1,0 +1,248 @@
+﻿@model IEnumerable<ExerciseTypeListViewModel>
+@using GymDiary.WebUI.ViewModels
+@{
+    ViewBag.Title = "Exercises";
+    string favoriteTable = "Favorites";
+    string allTable = "All";
+}
+
+<h2>@ViewBag.Title</h2>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <!--exercises list-->
+        <div class="panel panel-success">
+            <div class="panel-body">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#favoriteExercises">
+                        <span class="glyphicon glyphicon-star" style="font-size: 1.1em;"></span></a>
+                    </li>
+                    <li><a data-toggle="tab" href="#allExercises">All</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="favoriteExercises" class="tab-pane fade in active">
+                        <p></p>
+                        @{
+                            ViewBag.Table = favoriteTable;
+                        }
+                        @Html.Partial("_TablePartial", Model.Where(e => e.IsFavorite).ToList())
+                    </div>
+                    <div id="allExercises" class="tab-pane">
+                        <p></p>
+                        @{
+                            ViewBag.Table = allTable;
+                        }
+                        @Html.Partial("_TablePartial", Model)
+                        @Html.Partial("_CreatePartial", new CreateExerciseTypeViewModel())
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <!--edit exercise-->
+        <div class="panel panel-success">
+            <div class="panel-body">
+                @Html.Partial("_EditPartial", new EditExerciseTypeViewModel())
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+    // get data and replace elemId with it
+    function getData(elemId, url) {
+        $.get(url, function (data) {
+            $(elemId).replaceWith(data);
+        });
+    }
+    // refresh table
+    function refreshTable(tableName, urlGet) {
+        var tableId = "#" + tableName + "Table";
+        getData(tableId, urlGet);
+    }
+    // create and post exercise after clicking on button
+    function createExercise(buttonId, nameId, statusId, urlPost, allTableName, allUrlGet, favTableName) {
+        $(buttonId).click(function () {
+            var exercise = {
+                "Name": $(nameId).val()
+            }
+            $.post(urlPost, exercise,
+                function (status) {
+                    if (status != "Created successfully") {
+                        $(statusId).removeClass("text-success");
+                        $(statusId).addClass("text-danger");
+                        $(statusId).html(status);
+                    }
+                    else {
+                        $(statusId).removeClass("text-danger");
+                        $(statusId).addClass("text-success");
+                        $(statusId).html(status);
+                    }
+                }).done(function () {
+                    refreshTable(allTableName, allUrlGet);
+                    bindFavoriteButtons(allTableName, favTableName);
+                });
+        });
+    }
+    // mark exercise as favorite after clicking on button
+    function markExerciseAsFavorite(buttonId, eId, statusId, urlPost, favTableName, favUrlGet, allTableName, allUrlGet) {
+        $(document).off("click", buttonId).on("click", buttonId, function () {
+            $.post(urlPost + "/" + $(eId).val(), null,
+                function (status) {
+                    if (status != "Marked as favorite successfully") {
+                        $(statusId).removeClass("text-success");
+                        $(statusId).addClass("text-danger");
+                        $(statusId).html(status);
+                    }
+                    else {
+                        $(statusId).removeClass("text-danger");
+                        $(statusId).addClass("text-success");
+                        $(statusId).html(status);
+                    }
+                }).done(function () {
+                    refreshTable(favTableName, favUrlGet);
+                    refreshTable(allTableName, allUrlGet);
+                    bindFavoriteButtons(favTableName, allTableName);
+                    bindFavoriteButtons(allTableName, favTableName);
+                });
+        });
+    }
+    // bind each "mark exercise as favorite" button to appropriate row, update own and specified table
+    function bindFavoriteButtons(tableName, updTableName) {
+        var tableId = "#" + tableName + "Table";
+        var rowCount = $(tableId + " tbody tr").length;
+        for (var i = 0; i <= rowCount; i++) {
+            markExerciseAsFavorite(
+                "#markAsFav" + tableName + i,
+                "#eId" + tableName + i,
+                "#creationStatus",
+                "/Exercises/MarkAsFavorite",
+                tableName,
+                "/Exercises/Get" + tableName,
+                updTableName,
+                "/Exercises/Get" + updTableName
+            );
+        }
+    }
+    // show edit section for selected row from tableName
+    function showExerciseDetails(tableName) {
+        var tableId = "#" + tableName + "Table";
+        $(document).on("click", tableId + " tbody tr", function () {
+            var exerciseId = $(this).find("input").val();
+            var targetId = "#editSection";
+            var url = "/Exercises/GetDetails/" + exerciseId;
+            getData(targetId, url);
+        });
+    }
+    // update exercise after clicking on button
+    function updateExercise(buttonId, eId, nameId, descriptionId, isFavoriteId, statusId, urlPost, favTableName, favUrlGet, allTableName, allUrlGet) {
+        $(document).off("click", buttonId).on("click", buttonId, function () {
+            var exercise = {
+                "Id": $(eId).val(),
+                "Name": $(nameId).val(),
+                "Description": $(descriptionId).val(),
+                "IsFavorite": $(isFavoriteId).is(":checked")
+            };
+            $.post(urlPost, exercise,
+                function (status) {
+                    if (status != "Updated successfully") {
+                        $(statusId).removeClass("text-success");
+                        $(statusId).addClass("text-danger");
+                        $(statusId).html(status);
+                    }
+                    else {
+                        $(statusId).removeClass("text-danger");
+                        $(statusId).addClass("text-success");
+                        $(statusId).html(status);
+                    }
+                }).done(function () {
+                    refreshTable(favTableName, favUrlGet);
+                    refreshTable(allTableName, allUrlGet);
+                    bindFavoriteButtons(favTableName, allTableName);
+                    bindFavoriteButtons(allTableName, favTableName);
+                });
+        });
+    }
+    // delete exercise after clicking on button
+    function deleteExercise(buttonId, eId, nameId, descriptionId, isFavoriteId, statusId, urlPost, favTableName, favUrlGet, allTableName, allUrlGet) {
+        $(document).off("click", buttonId).on("click", buttonId, function () {
+            $.post(urlPost + "/" + $(eId).val(), null,
+                function (status) {
+                    if (status != "Deleted successfully") {
+                        $(statusId).removeClass("text-success");
+                        $(statusId).addClass("text-danger");
+                        $(statusId).html(status);
+                    }
+                    else {
+                        $(statusId).removeClass("text-danger");
+                        $(statusId).addClass("text-success");
+                        $(statusId).html(status);
+                        // clear edit section
+                        $(eId).val("0");
+                        $(nameId).val("");
+                        $(descriptionId).val("");
+                        $(isFavoriteId).prop("checked", false);
+                    }
+                }).done(function () {
+                    refreshTable(favTableName, favUrlGet);
+                    refreshTable(allTableName, allUrlGet);
+                    bindFavoriteButtons(favTableName, allTableName);
+                    bindFavoriteButtons(allTableName, favTableName);
+                });
+        });
+    }
+    // page loaded
+    $(document).ready(function () {
+        // bind create buttons' handlers
+        createExercise(
+            "#createExerciseType",
+            "#exerciseTypeName",
+            "#creationStatus",
+            "@Url.Action("Create")",
+            "@allTable",
+            "@Url.Action("Get" + allTable)",
+            "@favoriteTable"
+            );
+
+        // bind "mark exercise as favorite" buttons' handlers
+        bindFavoriteButtons("@allTable", "@favoriteTable");
+        bindFavoriteButtons("@favoriteTable", "@allTable");
+
+        // bind row clicks' handlers
+        showExerciseDetails("@allTable");
+        showExerciseDetails("@favoriteTable");
+
+        // bind update buttons' handlers
+        updateExercise(
+            "#updateExerciseType",
+            "#exerciseTypeIdEdit",
+            "#exerciseTypeNameEdit",
+            "#exerciseTypeDescriptionEdit",
+            "#exerciseTypeIsFavoriteEdit",
+            "#editingStatus",
+            "@Url.Action("Update")",
+            "@favoriteTable",
+            "@Url.Action("Get" + favoriteTable)",
+            "@allTable",
+            "@Url.Action("Get" + allTable)"
+            );
+
+        // bind delete buttons' handlers
+        deleteExercise(
+            "#deleteExerciseType",
+            "#exerciseTypeIdEdit",
+            "#exerciseTypeNameEdit",
+            "#exerciseTypeDescriptionEdit",
+            "#exerciseTypeIsFavoriteEdit",
+            "#editingStatus",
+            "@Url.Action("Delete")",
+            "@favoriteTable",
+            "@Url.Action("Get" + favoriteTable)",
+            "@allTable",
+            "@Url.Action("Get" + allTable)"
+            );
+    });
+
+</script>

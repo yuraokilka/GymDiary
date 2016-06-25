@@ -1,0 +1,54 @@
+﻿@model IList<GymDiary.WebUI.ViewModels.MeasurementViewModel>
+@{
+    int visibleRows = 5;
+}
+<div id="@string.Format("updateTable" + ViewBag.Section)">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Value</th>
+                <th>Difference</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                foreach (var item in Model)
+                {
+                    if (i < visibleRows)
+                    {
+                        <tr>
+                            <td class="col-md-5">@Html.DisplayFor(modelItem => item.MeasurementDate)</td>
+                            <td class="col-md-3">@Html.DisplayFor(modelItem => item.Value)</td>
+                            <td class="col-md-3">@Html.DisplayFor(modelItem => item.Difference)</td>
+                            <td class="col-md-1">@Html.HiddenFor(modelItem => item.Id,
+                                                new { @id = string.Format("mId" + ViewBag.Section + i) })
+                                <button id="@string.Format("delete" + ViewBag.Section + i)"
+                                        type="button" class="btn btn-danger btn-xs" style="visibility:hidden">
+                                    <span class="glyphicon glyphicon-remove"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr class="@string.Format("row" + ViewBag.Section) hide">
+                            <td class="col-md-5">@Html.DisplayFor(modelItem => item.MeasurementDate)</td>
+                            <td class="col-md-3">@Html.DisplayFor(modelItem => item.Value)</td>
+                            <td class="col-md-3">@Html.DisplayFor(modelItem => item.Difference)</td>
+                            <td class="col-md-1">@Html.HiddenFor(modelItem => item.Id,
+                                                new { @id = string.Format("mId" + ViewBag.Section + i) })
+                                <button id="@string.Format("delete" + ViewBag.Section + i)"
+                                        type="button" class="btn btn-danger btn-xs" style="visibility:hidden">
+                                    <span class="glyphicon glyphicon-remove"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>

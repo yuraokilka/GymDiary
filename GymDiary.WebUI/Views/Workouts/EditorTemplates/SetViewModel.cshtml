@@ -1,0 +1,16 @@
+﻿@model GymDiary.WebUI.ViewModels.SetViewModel
+
+@Html.HiddenFor(model => model.Id)
+<div class="col-md-2" style="padding-left: 0;">
+    @Html.EditorFor(model => model.Weight,
+    new { htmlAttributes = new { @class = "form-control", @placeholder = "Weight" } })
+    @Html.ValidationMessageFor(model => model.Weight, "", new { @class = "text-danger" })
+
+    <hr style="margin: 0; height:15px; visibility:hidden;" />
+
+    @Html.EditorFor(model => model.Repetitions,
+    new { htmlAttributes = new { @class = "form-control", @placeholder = "Repetitions" } })
+    @Html.ValidationMessageFor(model => model.Repetitions, "", new { @class = "text-danger" })
+
+    <hr style="margin: 0; height:15px; visibility:hidden;" />
+</div>

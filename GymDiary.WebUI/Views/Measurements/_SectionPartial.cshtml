@@ -1,0 +1,37 @@
+﻿@model IList<GymDiary.WebUI.ViewModels.MeasurementViewModel>
+@using GymDiary.WebUI.ViewModels
+
+<div id="@string.Format("section" + ViewBag.Section)">
+    <div class="panel panel-success">
+        <div class="panel-heading" data-toggle="collapse"
+             href="#@string.Format("collapse" + ViewBag.Section)" style="cursor:pointer">
+            <h4 class="panel-title">
+                @ViewBag.Section
+                <span class="badge pull-right">
+                    @{
+                        if (Model.Count != 0)
+                        {
+                            @Model.First().Value;
+                        }
+                        else
+                        {
+                            @:0
+                        }
+                    }
+                </span>
+            </h4>
+        </div>
+        <div class="panel-collapse collapse" id="@string.Format("collapse" + ViewBag.Section)">
+            <div class="panel-body">
+                @Html.Partial("_CreatePartial", new MeasurementViewModel { MeasurementDate = DateTime.Now, Value = "" })
+                @Html.Partial("_TablePartial", Model)
+                <div class="form-group">
+                    <div class="col-md-offset-0">
+                        <button id="@string.Format("showAll" + ViewBag.Section)" class="btn btn-default btn-sm">Show All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

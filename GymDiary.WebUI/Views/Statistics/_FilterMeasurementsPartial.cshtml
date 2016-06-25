@@ -1,0 +1,27 @@
+﻿@model GymDiary.WebUI.ViewModels.FilterMeasurementDynamics
+
+<div class="form-inline">
+    <div class="row">
+        <div class="col-md-9" style="padding: 0;">
+            <div class="col-md-6">
+                <div class="form-group" style="display: block">
+                    @Html.EditorFor(model => model.From,
+                    new { htmlAttributes = 
+                    new { @class = "form-control", @id = string.Format(ViewBag.Measurement + "From"), @style = "width: 100%" } })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group" style="display: block">
+                    @Html.EditorFor(model => model.To,
+                    new { htmlAttributes =
+                    new { @class = "form-control", @id = string.Format(ViewBag.Measurement + "To"), @style = "width: 100%" } })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <input type="submit" id="@string.Format("Show" + ViewBag.Measurement)" value="Show" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</div>

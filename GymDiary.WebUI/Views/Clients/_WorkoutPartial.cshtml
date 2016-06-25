@@ -1,0 +1,41 @@
+﻿@model GymDiary.WebUI.ViewModels.WorkoutViewModel
+
+<div class="panel panel-success">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-2">
+                @{
+                    if (Model.WorkoutDate.Date == DateTime.Today)
+                    {
+                        <div class="panel panel-success" style="display: inline-block;">
+                            <div class="panel-heading">@Model.WorkoutDate.Date.ToString("d")</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="panel panel-date" style="display: inline-block;">
+                            <div class="panel-heading">@Model.WorkoutDate.Date.ToString("d")</div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="col-md-8">
+                @{
+                    foreach (var exercise in Model.Exercises)
+                    {
+                        @Html.Partial("_ExercisePartial", exercise)
+                        if (exercise != Model.Exercises.Last())
+                        {
+                            <hr />
+                        }
+                    }
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-md-offset-9">
+                <h4 style="padding-left: 10px;">Total weight: <strong>@Model.TotalWeight</strong></h4>
+            </div>
+        </div>
+    </div>
+</div>

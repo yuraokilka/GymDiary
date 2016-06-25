@@ -1,0 +1,85 @@
+﻿@model IList<GymDiary.WebUI.ViewModels.WorkoutViewModel>
+@using GymDiary.WebUI.ViewModels
+@{
+    ViewBag.Title = "Workouts";
+    ViewBag.CompletedWorkouts = Model.Count;
+}
+<h2>@ViewBag.Title</h2>
+<hr />
+
+<!--filter workouts-->
+@Html.Partial("_FilterPartial", new FilterWorkoutList() { From = DateTime.Today.AddMonths(-1), To = DateTime.Today })
+<hr style="visibility: hidden; margin-top: 0;" />
+
+<!--workouts list-->
+<div class="row">
+    <div class="col-md-12">
+        @Html.Partial("_WorkoutListPartial", Model)
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+    // get workouts between fromDateId and toDateId and adding them to elemId
+    function refreshWorkouts(fromDateId, toDateId, elemId, urlPost) {
+        var constraints = {
+            "From": $(fromDateId).val(),
+            "To": $(toDateId).val()
+        }
+        $.post(urlPost, constraints,
+            function (data) {
+                $(elemId).replaceWith(data);
+                var completedWorkouts = $("#workoutsList").children(".panel").length;
+                $("#completedWorkouts").html(completedWorkouts);
+                bindDeleteButtons("#workoutsList");
+            });
+    }
+    // get workouts between fromDateId and toDateId and adding them to elemId after clicking on button
+    function showWorkouts(buttonId, fromDateId, toDateId, elemId, urlPost) {
+        $(document).on("click", buttonId, function () {
+            refreshWorkouts(fromDateId, toDateId, elemId, urlPost);
+        });
+    }
+    // delete workout after clicking on button
+    function deleteWorkout(buttonId, wId, urlPost) {
+        $(document).off("click", buttonId).on("click", buttonId, function (event) {
+            event.stopImmediatePropagation();
+            var url = urlPost + "/" + $(wId).val();
+            $.post(url, null,
+                function (data) {
+                });
+        });
+    }
+    // bind each delete button to appropriate workout
+    function bindDeleteButtons(divId) {
+        var buttonsCount = $(divId).children(".panel").length;
+        for (var i = 0; i < buttonsCount; i++) {
+            deleteWorkout(
+            "#deleteWorkout" + i,
+            "#wId" + i,
+            "/Workouts/Delete"
+            );
+        }
+    }
+    // page loaded
+    $(document).ready(function () {
+        // bind buttons' handlers
+        showWorkouts(
+            "#showWorkouts",
+            "#workoutsFrom",
+            "#workoutsTo",
+            "#workoutsList",
+            "@Url.Action("GetByDate")"
+            );
+        bindDeleteButtons("#workoutsList");
+        // refresh workouts list after deleting one of them
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            refreshWorkouts(
+                "#workoutsFrom",
+                "#workoutsTo",
+                "#workoutsList",
+                "@Url.Action("GetByDate")"
+                );
+        });
+    });
+</script>

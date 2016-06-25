@@ -1,0 +1,6 @@
+﻿@model GymDiary.WebUI.ViewModels.WorkoutViewModel
+@using GymDiary.WebUI.Extensions
+@{
+    Layout = null;
+}
+@Html.EditorForMany(model => model.Exercises, model => model.Index)

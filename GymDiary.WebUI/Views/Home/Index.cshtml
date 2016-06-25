@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Home";
+}
+
+<div class="jumbotron">
+    <h1>GymDiary</h1>
+    <p class="lead">
+        GymDiary is an online service for those who are engaged in bodybuilding, powerlifting, fitness,
+        and other power and aerobic sports.
+        In your hands will be a powerful tool that contains a workout diary,
+        an exercise catalog, body measurements, statistics and other useful features!
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Workout diary</h2>
+        <p>
+            You can organize your sports life with GymDiary.
+            Your training records will never be lost
+            and will be available at any time, in any place.
+        </p>
+        <p><a class="btn btn-default" href="@Url.Action("All", "Workouts")">Try it out &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Body measurements</h2>
+        <p>
+            Body measurements help to monitor the external changes and
+            to evaluate the efficiency of the training process.
+        </p>
+        <p><a class="btn btn-default" href="@Url.Action("All", "Measurements")">Try it out &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Statistics</h2>
+        <p>
+            You can monitor any deviations in your progress,
+            to adjust the training program in time and move exactly to the goal.
+        </p>
+        <p><a class="btn btn-default" href="@Url.Action("All", "Statistics")">Try it out &raquo;</a></p>
+    </div>
+</div>

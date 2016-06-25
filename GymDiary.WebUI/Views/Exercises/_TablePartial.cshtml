@@ -1,0 +1,33 @@
+﻿@model IList<GymDiary.WebUI.ViewModels.ExerciseTypeListViewModel>
+
+<div id="@string.Format(ViewBag.Table + "Table")">
+    <table class="table table-striped table-hover" style="table-layout: fixed;">
+        <tbody>
+            @{
+                int i = 0;
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="col-md-11" style="overflow: hidden;">@Html.DisplayFor(modelItem => item.Name)</td>
+                        <td class="col-md-1">
+                            @Html.HiddenFor(modelItem => item.Id,
+                                            new { @id = string.Format("eId" + ViewBag.Table + i) })
+                            <button id="@string.Format("markAsFav" + ViewBag.Table + i)"
+                                    type="button" class="btn btn-link btn-xs">
+                                @if (item.IsFavorite)
+                                {
+                                    <span class="glyphicon glyphicon-star" style="font-size: 1.2em;"></span>
+                                }
+                                else
+                                {
+                                    <span class="glyphicon glyphicon-star-empty" style="font-size: 1.2em;"></span>
+                                }
+                            </button>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>

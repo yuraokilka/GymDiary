@@ -1,0 +1,55 @@
+﻿@model IList<GymDiary.WebUI.ViewModels.WorkoutViewModel>
+@using GymDiary.WebUI.ViewModels
+@{
+    ViewBag.Title = "Clients' workouts";
+    ViewBag.CompletedWorkouts = Model.Count;
+}
+<h2>@ViewBag.Title</h2>
+<hr />
+
+<!--filter workouts-->
+@Html.Partial("_FilterPartial", new FilterClientsWorkoutList() { From = DateTime.Today.AddMonths(-1), To = DateTime.Today })
+<hr style="visibility: hidden; margin-top: 0;" />
+
+<!--workouts list-->
+<div class="row">
+    <div class="col-md-12">
+        @Html.Partial("_WorkoutListPartial", Model)
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+    // get workouts between fromDateId and toDateId and adding them to elemId
+    function refreshWorkouts(fromDateId, toDateId, clientUsernameId, elemId, urlPost) {
+        var constraints = {
+            "Username": $(clientUsername).val(),
+            "From": $(fromDateId).val(),
+            "To": $(toDateId).val()
+        }
+        $.post(urlPost, constraints,
+            function (data) {
+                $(elemId).replaceWith(data);
+                var completedWorkouts = $("#workoutsList").children(".panel").length;
+                $("#completedWorkouts").html(completedWorkouts);
+            });
+    }
+    // get workouts between fromDateId and toDateId and adding them to elemId after clicking on button
+    function showWorkouts(buttonId, fromDateId, toDateId, clientUsernameId, elemId, urlPost) {
+        $(document).on("click", buttonId, function () {
+            refreshWorkouts(fromDateId, toDateId, clientUsernameId, elemId, urlPost);
+        });
+    }
+    // page loaded
+    $(document).ready(function () {
+        // bind buttons' handlers
+        showWorkouts(
+            "#showWorkouts",
+            "#workoutsFrom",
+            "#workoutsTo",
+            "#clientUsername",
+            "#workoutsList",
+            "@Url.Action("GetByDate")"
+            );
+    });
+</script>

@@ -1,0 +1,43 @@
+﻿@using GymDiary.WebUI.ViewModels
+@{
+    var measurements = new List<string>()
+    {
+        "Weight", "Height", "UpperArm", "ForeArm", "Neck", "Chest", "Waist", "Hips", "Thigh", "Calf"
+    };
+    var filter = new FilterMeasurementDynamics() { From = DateTime.Today.AddMonths(-6), To = DateTime.Today };
+}
+@{
+    for (int i = 0; i < measurements.Count; i += 2)
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <h4>@measurements[i]</h4>
+                @{
+                    ViewBag.Measurement = measurements[i];
+                }
+                @Html.Partial("_FilterMeasurementsPartial", filter)
+                <div id="@string.Format(measurements[i] + "MeasurementDynamicsChart")" style="height: 250px;"></div>
+            </div>
+            <div class="col-md-6">
+                <h4>@measurements[i + 1]</h4>
+                @{
+                    ViewBag.Measurement = measurements[i + 1];
+                }
+                @if (measurements[i + 1] == "Height")
+                {
+                    @Html.Partial("_FilterMeasurementsPartial",
+                    new FilterMeasurementDynamics() { From = DateTime.Today.AddYears(-5), To = DateTime.Today })
+                }
+                else
+                {
+                    @Html.Partial("_FilterMeasurementsPartial", filter)
+                }
+                <div id="@string.Format(measurements[i + 1] + "MeasurementDynamicsChart")" style="height: 250px;"></div>
+            </div>
+        </div>
+        if (i != measurements.Count - 2)
+        {
+            <hr />
+        }
+    }
+}

@@ -1,0 +1,478 @@
+﻿@model GymDiary.WebUI.ViewModels.AllMeasurementsViewModel
+@using GymDiary.WebUI.ViewModels
+@{
+    ViewBag.Title = "Body measurements";
+    // overall
+    string weightSection = "Weight";
+    string heightSection = "Height";
+    // arms
+    string upperArmSection = "UpperArm";
+    string foreArmSection = "ForeArm";
+    // body
+    string neckSection = "Neck";
+    string chestSection = "Chest";
+    string waistSection = "Waist";
+    string hipsSection = "Hips";
+    // legs
+    string thighSection = "Thigh";
+    string calfSection = "Calf";
+}
+
+<h2>@ViewBag.Title</h2>
+<hr />
+<!--overall-->
+<div class="row">
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = weightSection;
+        }
+        @Html.Partial("_SectionPartial", Model.weightMeasurements)
+    </div>
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = heightSection;
+        }
+        @Html.Partial("_SectionPartial", Model.heightMeasurements)
+    </div>
+</div>
+<!--arms-->
+<div class="row">
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = upperArmSection;
+        }
+        @Html.Partial("_SectionPartial", Model.upperArmMeasurements)
+    </div>
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = foreArmSection;
+        }
+        @Html.Partial("_SectionPartial", Model.foreArmMeasurements)
+    </div>
+</div>
+<!--body-->
+<div class="row">
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = neckSection;
+        }
+        @Html.Partial("_SectionPartial", Model.neckMeasurements)
+    </div>
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = chestSection;
+        }
+        @Html.Partial("_SectionPartial", Model.chestMeasurements)
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = waistSection;
+        }
+        @Html.Partial("_SectionPartial", Model.waistMeasurements)
+    </div>
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = hipsSection;
+        }
+        @Html.Partial("_SectionPartial", Model.hipsMeasurements)
+    </div>
+</div>
+<!--legs-->
+<div class="row">
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = thighSection;
+        }
+        @Html.Partial("_SectionPartial", Model.thighMeasurements)
+    </div>
+    <div class="col-md-6">
+        @{
+            ViewBag.Section = calfSection;
+        }
+        @Html.Partial("_SectionPartial", Model.calfMeasurements)
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+    // get all measurement and replace elemId with it
+    function getAllMeasurement(elemId, url) {
+        $.get(url, function (data) {
+            $(elemId).replaceWith(data);
+        });
+    }
+    // create and post measurement after clicking on button
+    function createMeasurement(buttonId, dateId, valId, statusId, urlPost, tableId, urlGet, showBId, section) {
+        $(buttonId).click(function () {
+            var measurement = {
+                "MeasurementDate": $(dateId).val(),
+                "Value": $(valId).val()
+            }
+            $.post(urlPost, measurement,
+                function (status) {
+                    if (status != "Created successfully" &&
+                        status != "Updated successfully") {
+                        $(statusId).removeClass("text-success");
+                        $(statusId).addClass("text-danger");
+                        $(statusId).html(status);
+                    }
+                    else {
+                        $(statusId).removeClass("text-danger");
+                        $(statusId).addClass("text-success");
+                        $(statusId).html(status);
+                    }
+                }).done(function () {
+                    refreshTable(tableId, urlGet, showBId);
+                    bindDeleteButtons(tableId, section);
+                });
+        });
+    }
+    // delete measurement after clicking on button
+    function deleteMeasurement(buttonId, mId, statusId, urlPost, tableId, urlGet, showBId, section) {
+        $(document).off("click", buttonId).on("click", buttonId, function () {
+            $.post(urlPost + "/" + $(mId).val(), null,
+                function (status) {
+                    if (status != "Deleted successfully") {
+                        $(statusId).removeClass("text-success");
+                        $(statusId).addClass("text-danger");
+                        $(statusId).html(status);
+                    }
+                    else {
+                        $(statusId).removeClass("text-danger");
+                        $(statusId).addClass("text-success");
+                        $(statusId).html(status);
+                    }
+                }).done(function () {
+                    refreshTable(tableId, urlGet, showBId);
+                    bindDeleteButtons(tableId, section);
+                });
+        });
+    }
+    // bind each delete button to appropriate row
+    function bindDeleteButtons(tableId, section) {
+        var rowCount = $(tableId + " tbody tr").length;
+        for (var i = 0; i <= rowCount; i++) {
+            deleteMeasurement(
+            "#delete" + section + i,
+            "#mId" + section + i,
+            "#status" + section,
+            "/Measurements/Delete" + section,
+            "#updateTable" + section,
+            "/Measurements/GetAll" + section,
+            "#showAll" + section,
+            section
+            );
+        }
+    }
+    // show/hide rows in table after clicking on button
+    function showAllMeasurement(buttonId, trClass) {
+        $(buttonId).click(function () {
+            $(trClass).toggleClass("hide");
+            $(buttonId).text(function (i, text) {
+                return text === "Show All" ? "Hide" : "Show All";
+            });
+        });
+    }
+    // show button on row hover
+    function showButton(tableId, buttonIndex) {
+        $(document).on("mouseenter", tableId + " tbody tr", function () {
+            $(this).find("td:eq(" + buttonIndex + ") button").css("visibility", "visible");
+        });
+        $(document).on("mouseleave", tableId + " tbody tr", function () {
+            $(this).find("td:eq(" + buttonIndex + ") button").css("visibility", "hidden");
+        });
+    }
+    // get cell's values and put them to targetId
+    function getCellsValue(tableId, targetId1, targetId2) {
+        $(document).on("click", tableId + " tbody tr", function () {
+            var cellDate = $(this).find('td:eq(0)').text();
+            var cellValue = $(this).find('td:eq(1)').text();
+            $(targetId1).val(cellDate);
+            $(targetId2).val(cellValue);
+            $(targetId2).focus();
+        });
+    }
+    // refresh table
+    function refreshTable(tableId, urlGet, showBId) {
+        $(showBId).text("Show All");
+        getAllMeasurement(tableId, urlGet);
+    }
+    // page loaded
+    $(document).ready(function () {
+        // bind create buttons' handlers
+        createMeasurement(
+            "#@string.Format("create" + weightSection)",
+            "#@string.Format("measurementDate" + weightSection)",
+            "#@string.Format("value" + weightSection)",
+            "#@string.Format("status" + weightSection)",
+            "@Url.Action("Create" + weightSection)",
+            "#@string.Format("updateTable" + weightSection)",
+            "@Url.Action("GetAll" + weightSection)",
+            "#@string.Format("showAll" + weightSection)",
+            "@weightSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + heightSection)",
+            "#@string.Format("measurementDate" + heightSection)",
+            "#@string.Format("value" + heightSection)",
+            "#@string.Format("status" + heightSection)",
+            "@Url.Action("Create" + heightSection)",
+            "#@string.Format("updateTable" + heightSection)",
+            "@Url.Action("GetAll" + heightSection)",
+            "#@string.Format("showAll" + heightSection)",
+            "@heightSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + upperArmSection)",
+            "#@string.Format("measurementDate" + upperArmSection)",
+            "#@string.Format("value" + upperArmSection)",
+            "#@string.Format("status" + upperArmSection)",
+            "@Url.Action("Create" + upperArmSection)",
+            "#@string.Format("updateTable" + upperArmSection)",
+            "@Url.Action("GetAll" + upperArmSection)",
+            "#@string.Format("showAll" + upperArmSection)",
+            "@upperArmSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + foreArmSection)",
+            "#@string.Format("measurementDate" + foreArmSection)",
+            "#@string.Format("value" + foreArmSection)",
+            "#@string.Format("status" + foreArmSection)",
+            "@Url.Action("Create" + foreArmSection)",
+            "#@string.Format("updateTable" + foreArmSection)",
+            "@Url.Action("GetAll" + foreArmSection)",
+            "#@string.Format("showAll" + foreArmSection)",
+            "@foreArmSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + neckSection)",
+            "#@string.Format("measurementDate" + neckSection)",
+            "#@string.Format("value" + neckSection)",
+            "#@string.Format("status" + neckSection)",
+            "@Url.Action("Create" + neckSection)",
+            "#@string.Format("updateTable" + neckSection)",
+            "@Url.Action("GetAll" + neckSection)",
+            "#@string.Format("showAll" + neckSection)",
+            "@neckSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + chestSection)",
+            "#@string.Format("measurementDate" + chestSection)",
+            "#@string.Format("value" + chestSection)",
+            "#@string.Format("status" + chestSection)",
+            "@Url.Action("Create" + chestSection)",
+            "#@string.Format("updateTable" + chestSection)",
+            "@Url.Action("GetAll" + chestSection)",
+            "#@string.Format("showAll" + chestSection)",
+            "@chestSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + waistSection)",
+            "#@string.Format("measurementDate" + waistSection)",
+            "#@string.Format("value" + waistSection)",
+            "#@string.Format("status" + waistSection)",
+            "@Url.Action("Create" + waistSection)",
+            "#@string.Format("updateTable" + waistSection)",
+            "@Url.Action("GetAll" + waistSection)",
+            "#@string.Format("showAll" + waistSection)",
+            "@waistSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + hipsSection)",
+            "#@string.Format("measurementDate" + hipsSection)",
+            "#@string.Format("value" + hipsSection)",
+            "#@string.Format("status" + hipsSection)",
+            "@Url.Action("Create" + hipsSection)",
+            "#@string.Format("updateTable" + hipsSection)",
+            "@Url.Action("GetAll" + hipsSection)",
+            "#@string.Format("showAll" + hipsSection)",
+            "@hipsSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + thighSection)",
+            "#@string.Format("measurementDate" + thighSection)",
+            "#@string.Format("value" + thighSection)",
+            "#@string.Format("status" + thighSection)",
+            "@Url.Action("Create" + thighSection)",
+            "#@string.Format("updateTable" + thighSection)",
+            "@Url.Action("GetAll" + thighSection)",
+            "#@string.Format("showAll" + thighSection)",
+            "@thighSection"
+            );
+        createMeasurement(
+            "#@string.Format("create" + calfSection)",
+            "#@string.Format("measurementDate" + calfSection)",
+            "#@string.Format("value" + calfSection)",
+            "#@string.Format("status" + calfSection)",
+            "@Url.Action("Create" + calfSection)",
+            "#@string.Format("updateTable" + calfSection)",
+            "@Url.Action("GetAll" + calfSection)",
+            "#@string.Format("showAll" + calfSection)",
+            "@calfSection"
+            );
+
+        // bind delete buttons' handlers
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + weightSection)",
+            "@weightSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + heightSection)",
+            "@heightSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + upperArmSection)",
+            "@upperArmSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + foreArmSection)",
+            "@foreArmSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + neckSection)",
+            "@neckSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + chestSection)",
+            "@chestSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + waistSection)",
+            "@waistSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + hipsSection)",
+            "@hipsSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + thighSection)",
+            "@thighSection"
+            );
+        bindDeleteButtons(
+            "#@string.Format("updateTable" + calfSection)",
+            "@calfSection"
+            );
+
+        // bind showAll buttons' handlers
+        showAllMeasurement(
+            "#@string.Format("showAll" + weightSection)",
+            ".@string.Format("row" + weightSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + heightSection)",
+            ".@string.Format("row" + heightSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + upperArmSection)",
+            ".@string.Format("row" + upperArmSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + foreArmSection)",
+            ".@string.Format("row" + foreArmSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + neckSection)",
+            ".@string.Format("row" + neckSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + chestSection)",
+            ".@string.Format("row" + chestSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + waistSection)",
+            ".@string.Format("row" + waistSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + hipsSection)",
+            ".@string.Format("row" + hipsSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + thighSection)",
+            ".@string.Format("row" + thighSection)"
+            );
+        showAllMeasurement(
+            "#@string.Format("showAll" + calfSection)",
+            ".@string.Format("row" + calfSection)"
+            );
+
+        // bind row clicks' handlers
+        getCellsValue(
+            "#@string.Format("updateTable" + weightSection)",
+            "#@string.Format("measurementDate" + weightSection)",
+            "#@string.Format("value" + weightSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + heightSection)",
+            "#@string.Format("measurementDate" + heightSection)",
+            "#@string.Format("value" + heightSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + upperArmSection)",
+            "#@string.Format("measurementDate" + upperArmSection)",
+            "#@string.Format("value" + upperArmSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + foreArmSection)",
+            "#@string.Format("measurementDate" + foreArmSection)",
+            "#@string.Format("value" + foreArmSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + neckSection)",
+            "#@string.Format("measurementDate" + neckSection)",
+            "#@string.Format("value" + neckSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + chestSection)",
+            "#@string.Format("measurementDate" + chestSection)",
+            "#@string.Format("value" + chestSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + waistSection)",
+            "#@string.Format("measurementDate" + waistSection)",
+            "#@string.Format("value" + waistSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + hipsSection)",
+            "#@string.Format("measurementDate" + hipsSection)",
+            "#@string.Format("value" + hipsSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + thighSection)",
+            "#@string.Format("measurementDate" + thighSection)",
+            "#@string.Format("value" + thighSection)"
+            );
+        getCellsValue(
+            "#@string.Format("updateTable" + calfSection)",
+            "#@string.Format("measurementDate" + calfSection)",
+            "#@string.Format("value" + calfSection)"
+            );
+
+        // bind row hovers' handlers
+        showButton(
+            "#@string.Format("updateTable" + weightSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + heightSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + upperArmSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + foreArmSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + neckSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + chestSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + waistSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + hipsSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + thighSection)", 3);
+        showButton(
+            "#@string.Format("updateTable" + calfSection)", 3);
+    });
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryunobt")
+}

@@ -1,0 +1,33 @@
+﻿@model GymDiary.WebUI.ViewModels.TotalStatisticsViewModel
+
+<div class="panel panel-success">
+    <div class="panel-body">
+        <h3 style="margin-top: 10px; margin-bottom: 20px;">Total</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="well" style="margin-bottom: 0;">
+                    <h3 class="text-right" style="margin-top:0">Workouts</h3>
+                    <h3 class="text-right" style="margin-bottom:0"><strong>@Model.WorkoutsNum</strong></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="well" style="margin-bottom: 0;">
+                    <h3 class="text-right" style="margin-top:0">Exercises</h3>
+                    <h3 class="text-right" style="margin-bottom:0"><strong>@Model.ExercisesNum</strong></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="well" style="margin-bottom: 0;">
+                    <h3 class="text-right" style="margin-top:0">Sets</h3>
+                    <h3 class="text-right" style="margin-bottom:0"><strong>@Model.SetsNum</strong></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="well" style="margin-bottom: 0;">
+                    <h3 class="text-right" style="margin-top:0">Weights</h3>
+                    <h3 class="text-right" style="margin-bottom:0"><strong>@Model.TotalWeight</strong></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

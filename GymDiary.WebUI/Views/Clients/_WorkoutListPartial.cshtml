@@ -1,0 +1,13 @@
+﻿@model IList<GymDiary.WebUI.ViewModels.WorkoutViewModel>
+
+<div id="workoutsList">
+    @{
+        int i = 0;
+        foreach (var workout in Model)
+        {
+            ViewBag.WorkoutIndex = i;
+            @Html.Partial("_WorkoutPartial", workout)
+            i++;
+        }
+    }
+</div>

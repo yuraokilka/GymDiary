@@ -1,0 +1,33 @@
+﻿@model GymDiary.WebUI.ViewModels.FilterWorkoutList
+
+<div class="form-inline">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group" style="display: block">
+                @Html.EditorFor(model => model.From,
+                new { htmlAttributes = new { @class = "form-control", @id = "workoutsFrom", @style = "width: 100%" } })
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group" style="display: block">
+                @Html.EditorFor(model => model.To,
+                new { htmlAttributes = new { @class = "form-control", @id = "workoutsTo", @style = "width: 100%" } })
+            </div>
+        </div>
+        <div class="col-md-1">
+            <div class="form-group">
+                <input type="submit" id="showWorkouts" value="Show" class="btn btn-default" />
+            </div>
+        </div>
+        <div class="col-md-1">
+            <div class="form-group">
+                <input type="button" id="createWorkouts" value="Create" class="btn btn-default"
+                       onclick="location.href='@Url.Action("Create", "Workouts")'"/>
+            </div>
+        </div>
+        <div class="col-md-3"></div>
+        <div class="col-md-3">
+            <h4>Completed workouts: <strong id="completedWorkouts">@ViewBag.CompletedWorkouts</strong></h4>
+        </div>
+    </div>
+</div>

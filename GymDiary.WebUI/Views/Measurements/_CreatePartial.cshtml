@@ -1,0 +1,55 @@
+﻿@model GymDiary.WebUI.ViewModels.MeasurementViewModel
+
+<div class="form-inline">
+    <div class="form-group">
+        <div class="col-md-offset-0">
+            @Html.EditorFor(model => model.MeasurementDate, new
+           {
+               htmlAttributes =
+                new { @class = "form-control input-sm", @id = string.Format("measurementDate" + ViewBag.Section) }
+           })
+            @Html.ValidationMessageFor(model => model.MeasurementDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-12 col-md-offset-0">
+            @Html.EditorFor(model => model.Value, new
+           {
+               htmlAttributes =
+                new { @class = "form-control input-sm", @id = string.Format("value" + ViewBag.Section), @placeholder = "Value" }
+           })
+            @Html.ValidationMessageFor(model => model.Value, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-0">
+            <input type="submit" id="@string.Format("create" + ViewBag.Section)" value="Create" class="btn btn-default btn-sm" />
+        </div>
+    </div>
+</div>
+<p id="@string.Format("status" + ViewBag.Section)"></p>
+
+
+@*<div class="form-inline">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.EditorFor(model => model.MeasurementDate,
+                new { htmlAttributes = new { @class = "form-control input-sm", @id = string.Format("measurementDate" + ViewBag.Section) } })
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                @Html.EditorFor(model => model.Value,
+                new { htmlAttributes = new { @class = "form-control input-sm", @id = string.Format("value" + ViewBag.Section), @placeholder = "Value" } })
+            </div>
+        </div>
+        <div class="col-md-2">
+            <input type="submit" id="@string.Format("create" + ViewBag.Section)" value="Create" class="btn btn-default btn-sm" />
+        </div>
+    </div>
+</div>
+<p id="@string.Format("status" + ViewBag.Section)"></p>*@
+

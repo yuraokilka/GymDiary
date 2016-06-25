@@ -1,0 +1,30 @@
+﻿@model GymDiary.WebUI.ViewModels.ExternalLoginListViewModel
+@using Microsoft.Owin.Security
+
+@{
+    var loginProviders = Context.GetOwinContext().Authentication.GetExternalAuthenticationTypes();
+    if (loginProviders.Count() != 0)
+    {
+        <h4 style="margin-bottom: 15px;">Use another service to log in</h4>
+        using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = Model.ReturnUrl } ))
+        {
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="col-md-6" style="padding-right: 5px;">
+                    <button type="submit" class="btn btn-social btn-google btn-block" id="Google" name="provider"
+                            value="Google" title="Log in using your Google account"
+                            style="border-color: rgba(0,0,0,0); padding-left: 50px;">
+                        <span class="fa fa-google" style="width: 40px; line-height: 40px;"></span> Google
+                    </button>
+                </div>
+                <div class="col-md-6" style="padding-left: 0px;">
+                    <button type="submit" class="btn btn-social btn-facebook btn-block" id="Facebook" name="provider"
+                            value="Facebook" title="Log in using your Facebook account"
+                            style="border-color: rgba(0,0,0,0); padding-left: 48px;">
+                        <span class="fa fa-facebook" style="width: 40px; line-height: 40px;"></span> Facebook
+                    </button>
+                </div>
+            </div>
+        }
+    }
+}

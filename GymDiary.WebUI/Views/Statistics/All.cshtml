@@ -1,0 +1,196 @@
+﻿@model GymDiary.WebUI.ViewModels.AllStatisticsViewModel
+@using GymDiary.WebUI.ViewModels
+@{
+    ViewBag.Title = "Statistics";
+}
+
+<h2>@ViewBag.Title</h2>
+<hr />
+
+<!--total statistics-->
+<div class="row">
+    <div class="col-md-12">
+        @Html.Partial("_TotalPartial", Model.TotalStatistics)
+    </div>
+</div>
+
+<!--exercises statistics-->
+<div class="row">
+    <div class="col-md-12">
+        @Html.Partial("_FavoriteExercisesPartial", Model.FavoriteExerciseTypes)
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-success">
+            <div class="panel-body">
+                <h3 style="margin-top: 10px; margin-bottom: 10px;" W>Total weight dynamics</h3>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="totalWeightDynamicsChart" style="height: 250px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--visits statistics-->
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-success">
+            <div class="panel-body">
+                <h3 style="margin-top: 10px; margin-bottom: 10px;">Amount of workouts per month</h3>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="workoutsPerMonthChart" style="height: 250px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--measurements statistics-->
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-success">
+            <div class="panel-body">
+                <h3 style="margin-top: 10px; margin-bottom: 10px;">Body measurements</h3>
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.Partial("_MeasurementsPartial")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+<script>
+    // get data for chart and create it in elemId
+    function createBarChart(elemId, url, label) {
+        $.get(url, function (data) {
+            new Morris.Bar({
+                // ID of the element in which to draw the chart.
+                element: elemId,
+                // Chart data records -- each entry in this array corresponds to a point on the chart.
+                data: data,
+                // The name of the data record attribute that contains x-values.
+                xkey: "Date",
+                // A list of names of data record attributes that contain y-values.
+                ykeys: ["Value"],
+                // Labels for the ykeys -- will be displayed when you hover over the chart.
+                labels: [label],
+                // Color
+                barColors: ['#18bc9c'],
+                // Set to true or 'auto' to only show the hover legend when the mouse cursor is over the chart.
+                hideHover: 'true'
+            });
+        });
+    }
+    // get data for chart and create it in elemId
+    function createAreaChart(elemId, url, label) {
+        $.get(url, function (data) {
+            var arrayY = [];
+            for (var i = 0; i < data.length; i++) {
+                arrayY[i] = data[i].Value;
+            }
+            var min_of_array = Math.min.apply(Math, arrayY);
+            var max_of_array = Math.max.apply(Math, arrayY);
+            if (min_of_array == max_of_array)
+            {
+                min_of_array = "auto";
+                max_of_array = "auto";
+            }
+            new Morris.Area({
+                element: elemId,
+                data: data,
+                xkey: "Date",
+                ykeys: ["Value"],
+                labels: [label],
+                lineColors: ['#18bc9c'],
+                hideHover: 'true',
+                ymin: min_of_array,
+                ymax: max_of_array
+            });
+        });
+    }
+    // get data for chart and create it in elemId
+    function createAreaChartByDate(elemId, url, label, fromDateId, toDateId) {
+        var constraints = {
+            "From": $(fromDateId).val(),
+            "To": $(toDateId).val()
+        }
+        $.post(url, constraints, function (data) {
+            var arrayY = [];
+            for (var i = 0; i < data.length; i++) {
+                arrayY[i] = data[i].Value;
+            }
+            var min_of_array = Math.min.apply(Math, arrayY);
+            var max_of_array = Math.max.apply(Math, arrayY);
+            if (min_of_array == max_of_array) {
+                min_of_array = "auto";
+                max_of_array = "auto";
+            }
+            new Morris.Area({
+                element: elemId,
+                data: data,
+                xkey: "Date",
+                ykeys: ["Value"],
+                labels: [label],
+                lineColors: ['#18bc9c'],
+                hideHover: 'true',
+                ymin: min_of_array,
+                ymax: max_of_array
+            });
+        });
+    }
+    function showMeasurements(buttonId, elemId, url, label, fromDateId, toDateId) {
+        $(document).on("click", buttonId, function () {
+            $("#" + elemId).empty();
+            createAreaChartByDate(elemId, url, label, fromDateId, toDateId);
+        });
+    }
+    // page loaded
+    $(document).ready(function () {
+        // get data for charts
+        createBarChart(
+            "workoutsPerMonthChart",
+            "/Statistics/GetWorkoutsPerMonth",
+            "Workouts"
+            );
+        createAreaChart(
+            "totalWeightDynamicsChart",
+            "/Statistics/GetTotalWeightDynamics",
+            "Weight"
+            );
+        var measurements = ["Weight", "Height", "UpperArm", "ForeArm", "Neck", "Chest", "Waist", "Hips", "Thigh", "Calf"];
+
+        for (var i = 0; i < measurements.length; i++) {
+            createAreaChartByDate(
+                measurements[i] + "MeasurementDynamicsChart",
+                "/Statistics/Get" + measurements[i] + "MeasurementDynamics",
+                measurements[i],
+                "#" + measurements[i] + "From",
+                "#" + measurements[i] + "To"
+            );
+        }
+        // bind buttons' handlers
+        for (var i = 0; i < measurements.length; i++) {
+            showMeasurements(
+                "#Show" + measurements[i],
+                measurements[i] + "MeasurementDynamicsChart",
+                "/Statistics/Get" + measurements[i] + "MeasurementDynamics",
+                measurements[i],
+                "#" + measurements[i] + "From",
+                "#" + measurements[i] + "To"
+            );
+        }
+    });
+</script>
